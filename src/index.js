@@ -1,13 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+//import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import CustomersView from './CustomersView'
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  uri: 'http://localhost:3000/graphql'
+});
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <ApolloProvider client={client}>
+  <CustomersView />
+  </ApolloProvider>,
   document.getElementById('root')
 );
 
