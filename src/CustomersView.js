@@ -10,16 +10,17 @@ function CustomersView(props){
   const [showEditCustomer, setShowEditCustomer] = React.useState(false);
   const [currentCustomerId, setCurrentCustomerId] = React.useState(null);
   const { loading, error, data, refetch } = useQuery(GQLQueries.GET_ALL_CUSTOMERS);
-    
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>; 
+
+  const handleRefetch = () => refetch();
 
   const handleEditClose = () => setShowEditCustomer(false);
   const handleEditShow = (e) => { 
     setCurrentCustomerId(e.currentTarget.dataset.customerId);
     setShowEditCustomer(true);
-  }
-  const handleRefetch = () => refetch();
+  }  
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>; 
 
   return (
     <React.Fragment>

@@ -7,7 +7,10 @@ import { MockedProvider } from '@apollo/client/testing';
 import GQLQueries from './Queries';
 
 import CustomersView from './CustomersView';
-import { mount, shallow } from 'enzyme';
+
+import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom/extend-expect'
+import { render, fireEvent, waitFor, screen } from '@testing-library/react'
 
 let container = null;
 
@@ -20,6 +23,18 @@ const getAllCustomersMock = {
         customers: [{ id: '1', name: 'Rick', email: 'rptasznik+test@gmail.com', phone: '506-874-9480', address: 'Moncton' }],
       },
     },
+}
+
+const getCustomerMock = {
+  request: {
+    query: GQLQueries.GET_CUSTOMER,
+    variables: { id: '1' },
+  },
+  result: {
+    data: {
+      customer: { id: '1', name: 'Rick', email: 'rptasznik+test@gmail.com', phone: '506-874-9480', address: 'Moncton' },
+    },
+  },
 }
 
 const getAllCustomersWithErrorMock = {
@@ -105,27 +120,46 @@ const waitForComponentToPaint = async (wrapper) => {
   });
 };
 
-it('shows edit form', async () => {
+it('shows edit form for add', async () => {
 
-  const spy = jest.spyOn(CustomersView, "handleEditShow");
+  //const spy = jest.spyOn(CustomersView, "handleEditShow");
 
-  const wrapper = mount(
+  render(
     <MockedProvider mocks={[getAllCustomersMock]} addTypename={false}>
       <CustomersView />
     </MockedProvider>
   );
 
-  waitForComponentToPaint(wrapper);
+  await waitFor(() => screen.getByText('Add Customer'))
 
-  console.log('wrapper: ' + wrapper.instance().name);
+  const button = screen.getByText('Add Customer');
+  //console.log(button);  
+
+  userEvent.click(button);
   
+  expect(screen.getByPlaceholderText('Customer Name')).toHaveTextContent('');
+  expect(screen.getAllByRole('button')[1]).toHaveTextContent('Save')
+  expect(screen.getAllByRole('button')[2]).toHaveTextContent('Close')
+});
 
-  console.log(wrapper.props);
+it('shows edit form for edit', async () => {
 
-  const addButton = wrapper.find('button').at(0);
-  const editButton = wrapper.find('button').at(1);
-  addButton.simulate('click');
+  //const spy = jest.spyOn(CustomersView, "handleEditShow");
 
-  expect(spy).toHaveBeenCalled(1);
+  render(
+    <MockedProvider mocks={[getAllCustomersMock, getCustomerMock]} addTypename={false}>
+      <CustomersView />
+    </MockedProvider>
+  );
 
+  await waitFor(() => screen.getByText('Add Customer'))
+
+  const button = screen.getByText('Edit');
+
+  userEvent.click(button);
+  await waitFor(() => screen.getByText('Edit Customer'))
+  
+  expect(screen.getByPlaceholderText('Customer Name')).toHaveValue('Rick');
+  expect(screen.getAllByRole('button')[1]).toHaveTextContent('Save')
+  expect(screen.getAllByRole('button')[2]).toHaveTextContent('Close')
 });
